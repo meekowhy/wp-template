@@ -1,0 +1,77 @@
+version: "3"
+
+services:
+  db:
+    container_name: ${NAME}-db
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - "./app/data/db:/var/lib/mysql"
+    expose:
+      - "3306"
+    restart: unless-stopped
+
+  nginx:
+    container_name: ${NAME}-nginx
+    image: nginx:alpine
+    volumes:
+      - /home/mklasen/server-management/config/nginx:/etc/nginx/conf.d
+      - ./:/var/www/
+    expose:
+      - "80"
+    depends_on:
+      - wordpress
+    environment:
+      VIRTUAL_HOST: "${SITE_DOMAIN}"
+    links:
+      - wordpress
+    restart: unless-stopped
+
+  wordpress:
+    container_name: ${NAME}-wordpress
+    user: "1000:1000"
+    build:
+      context: /home/mklasen/server-management/config/wordpress
+      dockerfile: wordpress.Dockerfile
+    depends_on:
+      - db
+    expose:
+      - "9000"
+    volumes:
+      - /home/mklasen/server-management/config/php/default.conf:/usr/local/etc/php/conf.d/php.ini
+      - ./:/var/www/
+      - /home/mklasen/server-management/tmp/xdebug:/tmp/xdebug
+    links:
+      - db
+    external_links:
+      - catchall
+    environment:
+      PHP_AUTOCONF: /usr/bin/autoconf
+    restart: unless-stopped
+
+  toolbox:
+    container_name: ${NAME}-toolbox
+    image: wordpress:cli
+    command: tail -f /dev/null
+    user: "1000:1000"
+    volumes:
+      - ./:/var/www
+      - /home/mklasen/server-management/config/php/default.conf:/usr/local/etc/php/conf.d/default.ini
+      - /home/mklasen/server-management/tmp/xdebug:/tmp/xdebug
+    working_dir: /var/www
+    depends_on:
+      - wordpress
+      - db
+    links:
+      - wordpress
+      - db
+    restart: unless-stopped
+
+networks:
+  default:
+    external:
+      name: nginx-proxy

@@ -1,0 +1,68 @@
+{
+    "name": "",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Marinus Klasen",
+            "email": "marinus@mklasen.nl"
+        }
+    ],
+    "repositories": {
+        "0": {
+            "type": "composer",
+            "url": "https://wpackagist.org"
+        }
+    },
+    "require-dev": {
+        "wpackagist-plugin/simply-show-hooks": "1.*",
+        "squizlabs/php_codesniffer": "^3.6",
+        "wp-coding-standards/wpcs": "^2.3"
+    },
+    "require": {
+        "wecodemore/wpstarter": "~2.0",
+        "johnpbloch/wordpress-core": "*"
+    },
+    "config": {
+        "vendor-dir": "app/www/vendor",
+        "optimize-autoloader": true
+    },
+    "scripts": {
+        "post-install-cmd": "WCM\\WPStarter\\Setup::run",
+        "post-update-cmd": "WCM\\WPStarter\\Setup::run",
+        "wpstarter": "WCM\\WPStarter\\Setup::run"
+    },
+    "extra": {
+        "wordpress-install-dir": "app/www/wp",
+        "wordpress-content-dir": "app/www/content",
+        "wpstarter": {
+            "prevent-overwrite": [
+                ".gitignore",
+                "app/www/wp-config.php",
+                "app/www/index.php"
+            ],
+            "gitignore": {
+                "wp": true,
+                "wp-content": true,
+                "vendor": true,
+                "common": true,
+                "custom": [
+                    "*.log",
+                    ".htaccess",
+                    "sitemap.xml",
+                    "sitemap.xml.gz"
+                ]
+            }
+        },
+        "installer-paths": {
+            "app/www/content/plugins/{$name}": [
+                "type:wordpress-plugin"
+            ],
+            "app/www/content/mu-plugins/{$name}": [
+                "type:wordpress-muplugin"
+            ],
+            "app/www/content/themes/{$name}": [
+                "type:wordpress-theme"
+            ]
+        }
+    }
+}
